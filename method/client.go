@@ -1,8 +1,10 @@
 package method
 
 import (
-	"github.com/afosto/sendcloud-go"
+	"net/url"
 	"strconv"
+
+	"github.com/afosto/sendcloud-go"
 )
 
 type Client struct {
@@ -17,10 +19,38 @@ func New(apiKey string, apiSecret string) *Client {
 	}
 }
 
-// Get all shipment methods
-func (c *Client) GetMethods() ([]*sendcloud.Method, error) {
+type MethodOption func(*methodOptions)
+
+type methodOptions struct {
+	senderAddressID *int64
+}
+
+func WithSenderAddress(id int64) MethodOption {
+	return func(o *methodOptions) {
+		o.senderAddressID = &id
+	}
+}
+
+// Get all shipment methods with optional filters
+func (c *Client) GetMethods(opts ...MethodOption) ([]*sendcloud.Method, error) {
+	options := &methodOptions{}
+	for _, opt := range opts {
+		opt(options)
+	}
+
 	smr := sendcloud.MethodListResponseContainer{}
-	err := sendcloud.Request("GET", "/api/v2/shipping_methods", nil, c.apiKey, c.apiSecret, &smr)
+
+	values := url.Values{}
+	if options.senderAddressID != nil {
+		values.Set("sender_address", strconv.FormatInt(*options.senderAddressID, 10))
+	}
+
+	reqURL := "/api/v2/shipping_methods"
+	if len(values) > 0 {
+		reqURL += "?" + values.Encode()
+	}
+
+	err := sendcloud.Request("GET", reqURL, nil, c.apiKey, c.apiSecret, &smr)
 	if err != nil {
 		return nil, err
 	}
