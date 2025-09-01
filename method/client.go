@@ -66,10 +66,25 @@ func (c *Client) GetReturnMethods() ([]*sendcloud.Method, error) {
 	return smr.GetResponse().([]*sendcloud.Method), nil
 }
 
-// Get a single method
-func (c *Client) GetMethod(id int64) (*sendcloud.Method, error) {
+// Get a single method with optional sender_address filter
+func (c *Client) GetMethod(id int64, opts ...MethodOption) (*sendcloud.Method, error) {
+	options := &methodOptions{}
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	values := url.Values{}
+	if options.senderAddressID != nil {
+		values.Set("sender_address", strconv.FormatInt(*options.senderAddressID, 10))
+	}
+
+	reqURL := "/api/v2/shipping_methods/" + strconv.Itoa(int(id))
+	if len(values) > 0 {
+		reqURL += "?" + values.Encode()
+	}
+
 	mr := sendcloud.MethodResponseContainer{}
-	err := sendcloud.Request("GET", "/api/v2/shipping_methods/"+strconv.Itoa(int(id)), nil, c.apiKey, c.apiSecret, &mr)
+	err := sendcloud.Request("GET", reqURL, nil, c.apiKey, c.apiSecret, &mr)
 	if err != nil {
 		return nil, err
 	}
