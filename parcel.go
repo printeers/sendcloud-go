@@ -35,6 +35,9 @@ type ParcelParams struct {
 	PhoneNumber      string
 	ExternalID       string
 	ToServicePointID int64
+	Length           uint
+	Width            uint
+	Height           uint
 	OrderNumber      string
 	SenderID         int64
 
@@ -132,6 +135,9 @@ type ParcelRequest struct {
 	CountryState               string                       `json:"country_state"`
 	Country                    string                       `json:"country"`
 	Weight                     string                       `json:"weight,omitempty"`
+	Length                     uint                         `json:"length,omitempty"`
+	Width                      uint                         `json:"width,omitempty"`
+	Height                     uint                         `json:"height,omitempty"`
 	Telephone                  string                       `json:"telephone"`
 	Email                      string                       `json:"email"`
 	RequestLabel               bool                         `json:"request_label"`
@@ -287,6 +293,15 @@ func (p *ParcelParams) GetPayload() interface{} {
 			OriginCountry: item.OriginCountry,
 			SKU:           item.SKU,
 		}
+	}
+	if p.Length != 0 {
+		parcel.Length = p.Length
+	}
+	if p.Width != 0 {
+		parcel.Width = p.Width
+	}
+	if p.Height != 0 {
+		parcel.Height = p.Height
 	}
 
 	ar := ParcelRequestContainer{Parcel: parcel}
