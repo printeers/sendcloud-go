@@ -2,6 +2,7 @@ package sendcloud
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -35,6 +36,9 @@ type ParcelParams struct {
 	PhoneNumber      string
 	ExternalID       string
 	ToServicePointID int64
+	Length           uint
+	Width            uint
+	Height           uint
 	OrderNumber      string
 	SenderID         int64
 
@@ -132,6 +136,9 @@ type ParcelRequest struct {
 	CountryState               string                       `json:"country_state"`
 	Country                    string                       `json:"country"`
 	Weight                     string                       `json:"weight,omitempty"`
+	Length                     string                       `json:"length,omitempty"`
+	Width                      string                       `json:"width,omitempty"`
+	Height                     string                       `json:"height,omitempty"`
 	Telephone                  string                       `json:"telephone"`
 	Email                      string                       `json:"email"`
 	RequestLabel               bool                         `json:"request_label"`
@@ -287,6 +294,15 @@ func (p *ParcelParams) GetPayload() interface{} {
 			OriginCountry: item.OriginCountry,
 			SKU:           item.SKU,
 		}
+	}
+	if p.Length != 0 {
+		parcel.Length = strconv.FormatUint(uint64(p.Length), 10)
+	}
+	if p.Width != 0 {
+		parcel.Width = strconv.FormatUint(uint64(p.Width), 10)
+	}
+	if p.Height != 0 {
+		parcel.Height = strconv.FormatUint(uint64(p.Height), 10)
 	}
 
 	ar := ParcelRequestContainer{Parcel: parcel}
